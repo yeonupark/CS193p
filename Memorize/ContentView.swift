@@ -7,57 +7,107 @@
 
 import SwiftUI
 
-struct ContentView: View {
-    let emojis: [String] = ["🐤","🥝","🐠","🕸️","🐌","🍒","🐚","☄️","🍇","🐦"]
+enum Theme: CaseIterable {
     
-    @State var cardCount = 4
+    case animals
+    case fruits
+    case nature
+    
+    var symbol: String {
+        switch self {
+        case .animals:
+            "pawprint.fill"
+        case .fruits:
+            "carrot"
+        case .nature:
+            "globe.asia.australia.fill"
+        }
+    }
+    
+    var label: String {
+        switch self {
+        case .animals:
+            "Animals"
+        case .fruits:
+            "Fruits"
+        case .nature:
+            "Nature"
+        }
+    }
+    
+    var emojis: [String] {
+        switch self {
+        case .animals: ["🐤","🐻","🐠","🐙","🐌","🦖","🐤","🐻","🐠","🐙","🐌","🦖"]
+        case .fruits: ["🥝","🍒","🥭","🍑","🍉","🍓","🍇","🍏","🥝","🍒","🥭","🍑","🍉","🍓","🍇","🍏"]
+        case .nature: ["🌍","🪐","🌚","⭐️","☄️","🌕","💫","🌍","🪐","🌚","⭐️","☄️","🌕","💫"]
+        }
+    }
+    
+    var colors: Color {
+        switch self {
+        case .animals:
+            Color(.brown)
+        case .fruits:
+            Color(.orange)
+        case .nature:
+            Color(.green)
+        }
+    }
+}
+
+struct ContentView: View {
+    
+    @State var selectedTheme: Theme = .animals
+    @State var selectedEmojis: [String] = Theme.animals.emojis.shuffled()
     
     var body: some View {
         VStack {
+            title
             ScrollView {
                 cards
             }
             Spacer()
-            cardCountAdjusters
+            themeSelecter
         }
         .padding()
     }
     
+    var title: Text {
+        Text("Memorize!")
+            .font(.largeTitle)
+    }
+    
     var cards: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 120))]) {
-            ForEach(0..<cardCount, id: \.self) { index in
-                CardView(content: emojis[index])
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))]) {
+            ForEach(selectedEmojis.indices, id: \.self) { index in
+                CardView(content: selectedEmojis[index])
                     .aspectRatio(2/3, contentMode: .fit)
             }
         }
-        .foregroundColor(.orange)
+        .foregroundColor(selectedTheme.colors)
     }
     
-    var cardCountAdjusters: some View {
-        HStack {
-            cardRemover
-            Spacer()
-            cardAdder
-        }
-        .imageScale(.large)
-        .font(.title2)
-    }
-    
-    func cardCountAdjuster(by offset: Int, symbol: String) -> some View {
+    func themeButtonBuilder(theme: Theme) -> some View {
         Button(action: {
-            cardCount += offset
+            selectedTheme = theme
+            selectedEmojis = theme.emojis.shuffled()
         }, label: {
-            Image(systemName: symbol)
+            VStack{
+                Image(systemName: theme.symbol)
+                    .imageScale(.large)
+                    .font(.title3)
+                Text(theme.label)
+                    .font(.footnote)
+            }
         })
-        .disabled(cardCount + offset < 1 || cardCount + offset > emojis.count)
     }
     
-    var cardRemover: some View {
-        cardCountAdjuster(by: -1, symbol: "minus.circle.fill")
-    }
-    
-    var cardAdder: some View {
-        cardCountAdjuster(by: 1, symbol: "plus.circle.fill")
+    var themeSelecter: some View {
+        HStack(spacing: 50) {
+            themeButtonBuilder(theme: .animals)
+            themeButtonBuilder(theme: .fruits)
+            themeButtonBuilder(theme: .nature)
+        }
     }
 }
 
