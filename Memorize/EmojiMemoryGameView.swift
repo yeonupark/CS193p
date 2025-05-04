@@ -19,15 +19,15 @@ struct EmojiMemoryGameView: View {
                     .animation(.default, value: viewModel.cards)
             }
             Spacer()
-            Button("Shffle") {
-                viewModel.shuffle()
+            Button("New Game") {
+                viewModel.restart()
             }
         }
         .padding()
     }
     
     var title: Text {
-        Text("Memorize!")
+        Text(viewModel.themeName)
             .font(.largeTitle)
     }
     
@@ -35,7 +35,7 @@ struct EmojiMemoryGameView: View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 85), spacing: 0)], spacing: 0) {
             ForEach(viewModel.cards) { card in
                 if !card.isMatched {
-                    CardView(card)
+                    CardView(card, color: viewModel.themeColor)
                         .aspectRatio(2/3, contentMode: .fit)
                         .padding(4)
                         .onTapGesture {
@@ -50,16 +50,32 @@ struct EmojiMemoryGameView: View {
 struct CardView: View {
     
     let card: MemoryGame<String>.Card
+    let themeColor: Color
     
-    init(_ card: MemoryGame<String>.Card) {
+    init(_ card: MemoryGame<String>.Card, color: ThemeColor) {
         self.card = card
+        
+        switch color {
+        case .yellow:
+            themeColor = .yellow
+        case .pink:
+            themeColor = .pink
+        case .orange:
+            themeColor = .orange
+        case .blue:
+            themeColor = .blue
+        case .green:
+            themeColor = .green
+        case .purple:
+            themeColor = .purple
+        }
     }
     
     var body: some View {
         ZStack {
             let base = RoundedRectangle(cornerRadius: 12)
+                .fill(card.isFaceUp ? .white : themeColor)
             Group {
-                base.fill(.white)
                 base.strokeBorder(lineWidth: 2)
                 Text(card.content)
                     .font(.system(size: 200))
